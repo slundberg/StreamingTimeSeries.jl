@@ -2,16 +2,15 @@ module StreamingTimeSeries
 
 using Dates
 
-export EMAFeature, update!, value
+export EMAFeature, TimeSinceFeature, update!, valueat
 
+# see EMA_lin in http://www.eckner.com/papers/ts_alg.pdf
 type EMAFeature
     decayRate::Float64
     lastTime::DateTime
     lastValue::Float64
     value::Float64
 end
-
-# see EMA_lin in http://www.eckner.com/papers/ts_alg.pdf
 function update!(feature::EMAFeature, time::DateTime, value::Float64)
     @assert time >= feature.lastTime
     if time == feature.lastTime
@@ -28,9 +27,19 @@ function update!(feature::EMAFeature, time::DateTime, value::Float64)
 
     feature.value
 end
-
-function value(feature::EMAFeature)
+function valueat(feature::EMAFeature, time::DateTime)
     feature.value
+end
+
+# simply keep track of how far we are from the reference time point
+type TimeSinceFeature
+    referenceTime::DateTime
+end
+function update!(feature::TimeSinceFeature, time::DateTime)
+    feature.referenceTime = time
+end
+function valueat(feature::TimeSinceFeature, time::DateTime)
+    int(time - feature.referenceTime)/60000 # convert from milliseconds to minutes
 end
 
 end # module
