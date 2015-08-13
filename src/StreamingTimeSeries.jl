@@ -1,7 +1,5 @@
 module StreamingTimeSeries
 
-using Dates
-
 export EMAFeature, TimeSinceFeature, LastValueFeature, update!, valueat
 
 # see EMA_lin in http://www.eckner.com/papers/ts_alg.pdf

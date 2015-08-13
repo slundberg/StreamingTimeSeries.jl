@@ -1,6 +1,5 @@
 using StreamingTimeSeries
 using Base.Test
-using Dates
 
 # EMAFeature
 f = EMAFeature(1.0, DateTime(), 0.0, 0.0)
