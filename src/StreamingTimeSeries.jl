@@ -1,6 +1,6 @@
 module StreamingTimeSeries
 
-export EMAFeature, EMVFeature, TimeSinceFeature, LastValueFeature, update!, valueat
+export EMAFeature, EMVFeature, TimeSinceFeature, LastValueFeature, DecayFeature, update!, valueat
 
 # see EMA_lin in http://www.eckner.com/papers/ts_alg.pdf
 type EMAFeature
@@ -27,6 +27,7 @@ function update!(feature::EMAFeature, time::DateTime, value::Float64)
     feature.value
 end
 function valueat(feature::EMAFeature, time::DateTime)
+    @assert time >= feature.lastTime
     feature.value
 end
 
@@ -48,6 +49,7 @@ function update!(feature::EMVFeature, time::DateTime, value::Float64)
     feature.value = feature.ema2.value - feature.ema.value^2
 end
 function valueat(feature::EMVFeature, time::DateTime)
+    @assert time >= feature.ema.lastTime
     feature.value
 end
 
@@ -76,6 +78,28 @@ function update!(feature::LastValueFeature, time::DateTime)
 end
 function valueat(feature::LastValueFeature, time::DateTime)
     time < feature.time ? 0.0 : feature.value
+end
+
+
+# Sum all the values and let them decay exponentially
+type DecayFeature
+    decayRate::Float64
+    lastTime::DateTime
+    value::Float64
+end
+DecayFeature(decayRate::Float64) = DecayFeature(decayRate, DateTime(), 0.0)
+function update!(feature::DecayFeature, time::DateTime, value::Float64)
+    @assert time >= feature.lastTime
+
+    dt = Float64(time - feature.lastTime)/60000 # convert from milliseconds to minutes
+    feature.lastTime = time
+    feature.value *= feature.decayRate^dt
+    feature.value += value
+end
+function valueat(feature::DecayFeature, time::DateTime)
+    @assert time >= feature.lastTime
+    dt = Float64(time - feature.lastTime)/60000 # convert from milliseconds to minutes
+    feature.value * feature.decayRate^dt
 end
 
 end # module

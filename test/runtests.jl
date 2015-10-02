@@ -4,9 +4,9 @@ using Base.Test
 # EMAFeature
 f = EMAFeature(1.0)
 @test valueat(f, DateTime(2015,8,7)) == 0.0
-update!(f, DateTime(4050,12,1,1,1,1), 1.0)
+update!(f, DateTime(2014,12,1,1,1,1), 1.0)
 @test abs(valueat(f, DateTime(2015,8,7)) - 1.0) < 0.00001
-update!(f, DateTime(4050,12,1,1,1,1), 1.0)
+update!(f, DateTime(2014,12,1,1,1,1), 1.0)
 @test abs(valueat(f, DateTime(2015,8,7)) - 1.0) < 0.00001
 
 # EMVFeature
@@ -24,7 +24,7 @@ update!(f, DateTime(2015,8,15,15,0,0), 2.0)
 update!(f, DateTime(2015,8,15,16,0,0), 2.0)
 update!(f, DateTime(2015,8,15,17,0,0), 2.0)
 update!(f, DateTime(2015,8,15,18,0,0), 2.0)
-@test valueat(f, DateTime(2015,8,15,12,0,0)) < 0.1
+@test valueat(f, DateTime(2015,8,15,18,0,0)) < 0.1
 
 # TimeSinceFeature
 f = TimeSinceFeature(DateTime(2015,8,7,1,1,1))
@@ -39,3 +39,11 @@ f = LastValueFeature(DateTime(2015,8,7), 1.4)
 @test valueat(f, DateTime(2015,8,6)) == 0
 @test valueat(f, DateTime(2015,8,7)) == 1.4
 @test valueat(f, DateTime(2015,8,8)) == 1.4
+
+# DecayFeature
+f = DecayFeature(0.9)
+@test valueat(f, DateTime(2015,8,7)) == 0.0
+update!(f, DateTime(2014,12,1,1,1,1), 1.0)
+@test valueat(f, DateTime(2015,8,7)) < 0.00001
+update!(f, DateTime(2014,12,1,1,1,1), 1.0)
+@test abs(valueat(f, DateTime(2014,12,1,1,2,1)) - 2*0.9) < 0.00001
