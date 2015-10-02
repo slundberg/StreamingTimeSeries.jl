@@ -87,7 +87,7 @@ type DecayFeature
     lastTime::DateTime
     value::Float64
 end
-DecayFeature(decayRate::Float64) = DecayFeature(decayRate, DateTime(), 0.0)
+DecayFeature(halfLife::Real) = DecayFeature(exp(log(0.5)/halfLife), DateTime(), 0.0)
 function update!(feature::DecayFeature, time::DateTime, value::Float64)
     @assert time >= feature.lastTime
 

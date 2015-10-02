@@ -41,9 +41,9 @@ f = LastValueFeature(DateTime(2015,8,7), 1.4)
 @test valueat(f, DateTime(2015,8,8)) == 1.4
 
 # DecayFeature
-f = DecayFeature(0.9)
+f = DecayFeature(1)
 @test valueat(f, DateTime(2015,8,7)) == 0.0
 update!(f, DateTime(2014,12,1,1,1,1), 1.0)
 @test valueat(f, DateTime(2015,8,7)) < 0.00001
 update!(f, DateTime(2014,12,1,1,1,1), 1.0)
-@test abs(valueat(f, DateTime(2014,12,1,1,2,1)) - 2*0.9) < 0.00001
+@test abs(valueat(f, DateTime(2014,12,1,1,2,1)) - 1) < 0.00001
