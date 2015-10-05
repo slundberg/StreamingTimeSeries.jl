@@ -9,7 +9,7 @@ type EMAFeature
     lastValue::Float64
     value::Float64
 end
-EMAFeature(decayRate::Float64) = EMAFeature(decayRate, DateTime(), 0.0, 0.0)
+EMAFeature(decayRate::Real) = EMAFeature(decayRate, DateTime(), 0.0, 0.0)
 function update!(feature::EMAFeature, time::DateTime, value::Float64)
     @assert time >= feature.lastTime
     if time == feature.lastTime
@@ -36,7 +36,7 @@ type EMVFeature
     ema2::EMAFeature
     value::Float64
 end
-EMVFeature(decayRate::Float64) = EMVFeature(EMAFeature(decayRate), EMAFeature(decayRate), 0.0)
+EMVFeature(decayRate::Real) = EMVFeature(EMAFeature(decayRate), EMAFeature(decayRate), 0.0)
 function update!(feature::EMVFeature, time::DateTime, value::Float64)
     @assert time >= feature.ema.lastTime
     if time == feature.ema.lastTime

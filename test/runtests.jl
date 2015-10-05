@@ -2,7 +2,7 @@ using StreamingTimeSeries
 using Base.Test
 
 # EMAFeature
-f = EMAFeature(1.0)
+f = EMAFeature(1)
 @test valueat(f, DateTime(2015,8,7)) == 0.0
 update!(f, DateTime(2014,12,1,1,1,1), 1.0)
 @test abs(valueat(f, DateTime(2015,8,7)) - 1.0) < 0.00001
@@ -10,7 +10,7 @@ update!(f, DateTime(2014,12,1,1,1,1), 1.0)
 @test abs(valueat(f, DateTime(2015,8,7)) - 1.0) < 0.00001
 
 # EMVFeature
-f = EMVFeature(2.0)
+f = EMVFeature(2)
 @test valueat(f, DateTime(2015,8,7)) == 0.0
 update!(f, DateTime(2015,8,15,9,0,0), 1.0)
 update!(f, DateTime(2015,8,15,10,0,0), 10.0)
