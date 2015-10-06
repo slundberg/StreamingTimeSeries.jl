@@ -63,6 +63,9 @@ TimeSinceFeature() = TimeSinceFeature(DateTime(0,1,1,0,0,0))
 function update!(feature::TimeSinceFeature, time::DateTime)
     feature.referenceTime = time
 end
+function update!(feature::TimeSinceFeature, time::DateTime, ignored::Float64)
+    update!(feature, time)
+end
 function valueat(feature::TimeSinceFeature, time::DateTime)
     numMin = Float64(time - feature.referenceTime)/60000 # convert from milliseconds to minutes
     numMin < 0.0 ? 0.0 : numMin
@@ -74,7 +77,7 @@ type LastValueFeature
     value::Float64
 end
 LastValueFeature() = LastValueFeature(DateTime(0,1,1,0,0,0), 0.0)
-function update!(feature::LastValueFeature, time::DateTime)
+function update!(feature::LastValueFeature, time::DateTime, value::Float64)
     feature.time = time
     feature.value = value
 end
