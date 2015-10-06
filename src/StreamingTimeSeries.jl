@@ -59,6 +59,7 @@ end
 type TimeSinceFeature
     referenceTime::DateTime
 end
+TimeSinceFeature() = TimeSinceFeature(DateTime(0,1,1,0,0,0))
 function update!(feature::TimeSinceFeature, time::DateTime)
     feature.referenceTime = time
 end
@@ -72,6 +73,7 @@ type LastValueFeature
     time::DateTime
     value::Float64
 end
+LastValueFeature() = LastValueFeature(DateTime(0,1,1,0,0,0), 0.0)
 function update!(feature::LastValueFeature, time::DateTime)
     feature.time = time
     feature.value = value

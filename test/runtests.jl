@@ -33,12 +33,18 @@ update!(f, DateTime(2015,8,7,2,1,1))
 @test valueat(f, DateTime(2015,8,7,2,1,1)) == 0.0
 @test valueat(f, DateTime(2015,8,7,2,3,1)) == 2.0
 @test valueat(f, DateTime(2014,8,7,2,3,1)) == 0.0
+f = TimeSinceFeature()
+update!(f, DateTime(2015,8,7,2,1,1))
+@test valueat(f, DateTime(2015,8,7,2,1,1)) == 0.0
+@test valueat(f, DateTime(2015,8,7,2,3,1)) == 2.0
 
 # LastValueFeature
 f = LastValueFeature(DateTime(2015,8,7), 1.4)
 @test valueat(f, DateTime(2015,8,6)) == 0
 @test valueat(f, DateTime(2015,8,7)) == 1.4
 @test valueat(f, DateTime(2015,8,8)) == 1.4
+f = LastValueFeature()
+@test valueat(f, DateTime(2015,8,6)) == 0
 
 # DecayFeature
 f = DecayFeature(1)
