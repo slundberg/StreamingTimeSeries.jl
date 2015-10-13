@@ -1,6 +1,6 @@
 module StreamingTimeSeries
 
-export EMAFeature, EMVFeature, TimeSinceFeature, LastValueFeature, DecayFeature, update!, valueat
+export EMAFeature, EMVFeature, TimeSinceFeature, LastValueFeature, DecayFeature, LagSumFeature, update!, valueat
 
 # see EMA_lin in http://www.eckner.com/papers/ts_alg.pdf
 type EMAFeature
@@ -105,6 +105,52 @@ function valueat(feature::DecayFeature, time::DateTime)
     @assert time >= feature.lastTime
     dt = Float64(time - feature.lastTime)/60000 # convert from milliseconds to minutes
     feature.value * feature.decayRate^dt
+end
+
+"Sum all the values in a window, the starting point is excluded and the end point included."
+type LagSumFeature
+    lagStart::Dates.TimePeriod # exclusive
+    lagEnd::Dates.TimePeriod # inclusive
+    bufferTimes::Array{DateTime,1}
+    bufferValues::Array{Float64,1}
+    windowTimes::Array{DateTime,1}
+    windowValues::Array{Float64,1}
+    lastTime::DateTime
+    value::Float64
+end
+LagSumFeature(lagStart::Dates.TimePeriod, lagEnd::Dates.TimePeriod) = LagSumFeature(lagStart, lagEnd, DateTime[], DateTime[], Float64[], Float64[], DateTime(), 0.0)
+function update!(feature::LagSumFeature, time::DateTime, value::Float64)
+    @assert time >= feature.lastTime
+    feature.lastTime = time
+    unshift!(feature.bufferTimes, time)
+    unshift!(feature.bufferValues, value)
+end
+function valueat(feature::LagSumFeature, time::DateTime)
+    @assert time >= feature.lastTime
+
+    # move data from the buffer to the window
+    for i in length(feature.bufferTimes):-1:1
+        if time - feature.bufferTimes[i] >= feature.lagEnd
+            unshift!(feature.windowTimes, pop!(feature.bufferTimes))
+            unshift!(feature.windowValues, pop!(feature.bufferValues))
+            feature.value += feature.windowValues[1]
+        else
+            break
+        end
+    end
+
+    # move data out of the window
+    for i in length(feature.windowTimes):-1:1
+        if time - feature.windowTimes[i] >= feature.lagStart
+            pop!(feature.windowTimes)
+            feature.value -= pop!(feature.windowValues)
+        else
+            break
+        end
+    end
+    feature.lastTime = time
+
+    feature.value
 end
 
 end # module

@@ -53,3 +53,21 @@ update!(f, DateTime(2014,12,1,1,1,1), 1.0)
 @test valueat(f, DateTime(2015,8,7)) < 0.00001
 update!(f, DateTime(2014,12,1,1,1,1), 1.0)
 @test abs(valueat(f, DateTime(2014,12,1,1,2,1)) - 1) < 0.00001
+
+# LagSumFeature
+f = LagSumFeature(Dates.Minute(1), Dates.Minute(0))
+@test valueat(f, DateTime(2015,8,7)) == 0.0
+update!(f, DateTime(2015,9,1,1,1,1), 1.0)
+@test valueat(f, DateTime(2015,9,1,1,1,1)) == 1.0
+update!(f, DateTime(2015,9,1,1,2,1), 1.0)
+@test valueat(f, DateTime(2015,9,1,1,2,1)) == 1.0
+@test valueat(f, DateTime(2015,9,1,1,3,1)) == 0.0
+
+f = LagSumFeature(Dates.Minute(6), Dates.Minute(4))
+update!(f, DateTime(2015,9,1,1,1,1), 1.0)
+update!(f, DateTime(2015,9,1,1,2,1), 1.0)
+@test valueat(f, DateTime(2015,9,1,1,3,1)) == 0.0
+@test valueat(f, DateTime(2015,9,1,1,5,1)) == 1.0
+@test valueat(f, DateTime(2015,9,1,1,6,1)) == 2.0
+@test valueat(f, DateTime(2015,9,1,1,7,1)) == 1.0
+@test valueat(f, DateTime(2015,9,1,1,8,1)) == 0.0
