@@ -79,3 +79,13 @@ update!(f, DateTime(2015,9,1,1,2,1), 1.0)
 @test valueat(f, DateTime(2015,9,1,1,6,1)) == 2.0
 @test valueat(f, DateTime(2015,9,1,1,7,1)) == 1.0
 @test valueat(f, DateTime(2015,9,1,1,8,1)) == 0.0
+
+# LagLastValueFeature
+f = LagLastValueFeature(Dates.Second(1), DateTime())
+@test valueat(f, DateTime(2015,8,7)) == 0.0
+update!(f, DateTime(2015,9,1,1,1,1), 1.0)
+@test valueat(f, DateTime(2015,9,1,1,1,1)) == 0.0
+update!(f, DateTime(2015,9,1,1,1,2), 2.0)
+@test valueat(f, DateTime(2015,9,1,1,1,2)) == 1.0
+@test valueat(f, DateTime(2015,9,1,1,1,3)) == 2.0
+@test valueat(f, DateTime(2015,9,1,1,1,4)) == 2.0

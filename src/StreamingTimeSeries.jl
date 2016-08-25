@@ -2,7 +2,16 @@ module StreamingTimeSeries
 
 import Base.Dates.TimeType
 
-export EMAFeature, EMVFeature, TimeSinceFeature, LastValueFeature, DecayFeature, LagSumFeature, update!, valueat
+export
+    EMAFeature,
+    EMVFeature,
+    TimeSinceFeature,
+    LastValueFeature,
+    DecayFeature,
+    LagSumFeature,
+    LagLastValueFeature,
+    update!,
+    valueat
 
 # see EMA_lin in http://www.eckner.com/papers/ts_alg.pdf
 type EMAFeature{T<:TimeType}
@@ -150,6 +159,37 @@ function valueat{T<:TimeType}(feature::LagSumFeature{T}, time::T)
         end
     end
     feature.lastTime = time
+
+    feature.value
+end
+
+"Report the last value with event time <= a given lag point."
+type LagLastValueFeature{T<:TimeType}
+    lag::Dates.TimePeriod # inclusive
+    bufferTimes::Array{T,1}
+    bufferValues::Array{Float64,1}
+    lastTime::T
+    value::Float64
+end
+LagLastValueFeature{T<:TimeType}(lag::Dates.TimePeriod, lastTime::T) = LagLastValueFeature(lag, T[], Float64[], lastTime, 0.0)
+function update!{T<:TimeType}(feature::LagLastValueFeature{T}, time::T, value::Float64)
+    @assert time >= feature.lastTime
+    feature.lastTime = time
+    unshift!(feature.bufferTimes, time)
+    unshift!(feature.bufferValues, value)
+end
+function valueat{T<:TimeType}(feature::LagLastValueFeature{T}, time::T)
+    @assert time >= feature.lastTime
+
+    # move data from the buffer until we get to the current time point
+    for i in length(feature.bufferTimes):-1:1
+        if time - feature.bufferTimes[i] >= feature.lag
+            pop!(feature.bufferTimes)
+            feature.value = pop!(feature.bufferValues)
+        else
+            break
+        end
+    end
 
     feature.value
 end
