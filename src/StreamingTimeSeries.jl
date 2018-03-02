@@ -27,7 +27,7 @@ function update!{T<:TimeType}(feature::EMAFeature{T}, time::T, value::Float64)
         return feature.value
     end
 
-    dt = Float64(time - feature.lastTime)/60000 # convert from milliseconds to minutes
+    dt = Dates.value(time - feature.lastTime)/60000 # convert from milliseconds to minutes
     a = dt / feature.decayRate
     u = exp(-a)
     v = (1 - u) / a
@@ -77,7 +77,7 @@ function update!{T<:TimeType}(feature::TimeSinceFeature{T}, time::T, ignored::Fl
     update!(feature, time)
 end
 function valueat{T<:TimeType}(feature::TimeSinceFeature{T}, time::T)
-    numMin = Float64(time - feature.referenceTime)/60000 # convert from milliseconds to minutes
+    numMin = Dates.value(time - feature.referenceTime)/60000 # convert from milliseconds to minutes
     numMin < 0.0 ? 0.0 : numMin
 end
 
@@ -106,14 +106,14 @@ DecayFeature{T<:TimeType}(halfLife::Float64, lastTime::T) = DecayFeature(exp(log
 function update!{T<:TimeType}(feature::DecayFeature{T}, time::T, value::Float64)
     @assert time >= feature.lastTime
 
-    dt = Float64(time - feature.lastTime)/60000 # convert from milliseconds to minutes
+    dt = Dates.value(time - feature.lastTime)/60000 # convert from milliseconds to minutes
     feature.lastTime = time
     feature.value *= feature.decayRate^dt
     feature.value += value
 end
 function valueat{T<:TimeType}(feature::DecayFeature{T}, time::T)
     @assert time >= feature.lastTime
-    dt = Float64(time - feature.lastTime)/60000 # convert from milliseconds to minutes
+    dt = Dates.value(time - feature.lastTime)/60000 # convert from milliseconds to minutes
     feature.value * feature.decayRate^dt
 end
 
